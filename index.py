@@ -4,7 +4,7 @@ from deep_translator import GoogleTranslator
 from bs4 import BeautifulSoup
 
 # 1. Configuração de Página e Layout
-st.set_page_config(page_title="Radar Tech Pro", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Markos News - Site Pessoal", layout="wide", initial_sidebar_state="collapsed")
 
 def traduzir_texto(texto):
     if not texto: return ""
@@ -91,7 +91,7 @@ st.markdown("""
             border: none !important;
             color: #A99BBF !important;
             font-weight: 600 !important;
-            font-size: 0.85rem !important;
+            font-size: 1.25rem !important;
             letter-spacing: 1px;
             text-transform: uppercase;
             height: 100%;
