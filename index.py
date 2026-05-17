@@ -170,7 +170,11 @@ fontes = {
         "https://www.bleepingcomputer.com/feed/",
         "https://krebsonsecurity.com/feed/",
         "https://tecnoblog.net/categoria/seguranca/feed/",
-        "https://mundohacker.com.br/feed/"
+        "https://mundohacker.com.br/feed/",
+        "https://www.helpnetsecurity.com/feed/",          # Novo: Help Net Security
+        "https://www.cisoadvisor.com.br/feed/",           # Novo: CISO Advisor (BR)
+        "https://cybernews.com/feed/",                    # Novo: CyberNews
+        "https://www.exploit-db.com/rss.xml"              # Novo: Exploit Database
     ],
     "HARDWARE": [
         "https://hackaday.com/blog/feed/",
