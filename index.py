@@ -3,7 +3,7 @@ import feedparser
 from deep_translator import GoogleTranslator
 
 # 1. Configuração de Página
-st.set_page_config(page_title="Radar Pessoal", layout="centered", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Mark Newa - Minhas notícias pessoais", layout="centered", initial_sidebar_state="collapsed")
 
 def traduzir_manchete(texto):
     if not texto:
@@ -200,7 +200,7 @@ fontes_astro = [
 ]
 
 # 4. As 3 Abas
-aba1, aba2, aba3 = st.tabs(["🔒 Segurança e Hacking", "⚙️ Hardware e IoTs", "🔭 Astronomia"])
+aba1, aba2, aba3 = st.tabs(["🔒 Segurança & Hacking", "⚙️ Hardware & IoTs", "🔭 Astronomia"])
 
 def renderizar_noticias(noticias):
     for n in noticias:
