@@ -184,6 +184,10 @@ fontes = {
         "https://www.hackster.io/projects.rss"    # Focado 100% em projetos práticos de IoT e embarcados
     ],
     "GAMES": [ # <-- NOVA CATEGORIA AQUI
+        "https://br.ign.com/feed.xml",
+        "https://www.theenemy.com.br/rss",
+        "https://www.pcgamer.com/rss/",
+        "https://www.eurogamer.net/feed",
         "https://www.polygon.com/rss/index.xml",
         "https://www.gamespot.com/feeds/game-news/",
         "https://rss.indiedb.com/headlines/def/feed.rss"
