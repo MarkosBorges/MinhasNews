@@ -29,7 +29,8 @@ def extrair_imagem(entry, categoria):
         "SEGURANÇA": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80",
         "HARDWARE": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80",
         "GAMES": "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=600&q=80",
-        "ASTRONOMIA": "https://images.unsplash.com/photo-1464802686167-b939a6910659?w=600&q=80"
+        "ASTRONOMIA": "https://images.unsplash.com/photo-1464802686167-b939a6910659?w=600&q=80",
+        "SÉRIES E FILMES": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&q=80"
     }
     return fallbacks.get(categoria)
 
@@ -200,7 +201,14 @@ fontes = {
         "https://www.space.com/feeds/all",
         "https://www.universetoday.com/feed/",
         "https://canaltech.com.br/espaco/rss/"
+    ],
+    "SÉRIES E FILMES": [
+        "https://cinepop.com.br/feed/",
+        "https://www.omelete.com.br/feed",
+        "https://deadline.com/feed/",
+        "https://screenrant.com/feed/"
     ]
+    
 }
 
 # 4. Função para renderizar o grid de notícias limpo
@@ -235,7 +243,12 @@ with aba3:
         noticias_astro = buscar_e_traduzir(fontes["ASTRONOMIA"], "ASTRONOMIA")
         renderizar_grade(noticias_astro)
 
-with aba4: # <-- NOVO BLOCO DE GAMES
+with aba4:
     with st.spinner("Dando Start nos Games..."):
         noticias_games = buscar_e_traduzir(fontes["GAMES"], "GAMES")
         renderizar_grade(noticias_games)
+
+with aba5: 
+    with st.spinner("Preparando a pipoca..."):
+        noticias_filmes = buscar_e_traduzir(fontes["SÉRIES E FILMES"], "SÉRIES E FILMES")
+        renderizar_grade(noticias_filmes)
