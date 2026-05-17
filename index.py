@@ -91,11 +91,11 @@ st.markdown("""
             border: none !important;
             color: #A99BBF !important;
             font-weight: 600 !important;
-            font-size: 1.25rem !important;
+            font-size: 1.85rem !important;
             letter-spacing: 1px;
             text-transform: uppercase;
             height: 100%;
-            padding: 0 10px;
+            padding: 0 20px;
             transition: color 0.2s;
         }
         div[data-baseweb="tab"]:hover {
