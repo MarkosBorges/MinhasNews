@@ -226,7 +226,7 @@ def renderizar_grade(noticias):
     
     st.markdown(html, unsafe_allow_html=True)
 # 5. ABAS NATIVAS COMO HEADER
-aba1, aba2, aba3, aba4 = st.tabs(["SEGURANÇA", "HARDWARE", "ASTRONOMIA", "GAMES"])
+aba1, aba2, aba3, aba4, aba5 = st.tabs(["SEGURANÇA", "HARDWARE", "ASTRONOMIA", "GAMES", "FILMES E SÉRIES"])
 
 with aba1:
     with st.spinner("Carregando relatórios de Segurança..."):
