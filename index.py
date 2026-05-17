@@ -186,23 +186,19 @@ fontes = {
 }
 
 # 4. Função para renderizar o grid de notícias limpo
+# 4. Função para renderizar o grid de notícias limpo (Corrigida)
 def renderizar_grade(noticias):
     html = '<div class="news-grid">'
     for n in noticias:
-        html += f'''
-            <div class="card" onclick="window.open('{n['link']}', '_blank')">
-                <img src="{n['imagem']}" class="card-image" alt="Capa">
-                <div class="card-title">
-                    <a href="{n['link']}" target="_blank">{n['titulo']}</a>
-                </div>
-                <div class="card-meta">
-                    <span>{n['fonte']}</span>
-                </div>
-            </div>
-        '''
+        # Escrevendo o HTML em linha reta para evitar que o Markdown crie blocos de código
+        html += f"<div class='card' onclick=\"window.open('{n['link']}', '_blank')\">"
+        html += f"<img src='{n['imagem']}' class='card-image' alt='Capa'>"
+        html += f"<div class='card-title'><a href='{n['link']}' target='_blank'>{n['titulo']}</a></div>"
+        html += f"<div class='card-meta'><span>{n['fonte']}</span></div>"
+        html += "</div>"
     html += '</div>'
+    
     st.markdown(html, unsafe_allow_html=True)
-
 # 5. ABAS NATIVAS COMO HEADER
 aba1, aba2, aba3 = st.tabs(["SEGURANÇA", "HARDWARE", "ASTRONOMIA"])
 
