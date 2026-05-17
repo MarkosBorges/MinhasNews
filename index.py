@@ -28,6 +28,7 @@ def extrair_imagem(entry, categoria):
     fallbacks = {
         "SEGURANÇA": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80",
         "HARDWARE": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80",
+        "GAMES": "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=600&q=80",
         "ASTRONOMIA": "https://images.unsplash.com/photo-1464802686167-b939a6910659?w=600&q=80"
     }
     return fallbacks.get(categoria)
@@ -182,6 +183,11 @@ fontes = {
         "https://www.raspberrypi.com/news/feed/", # Novidades do mundo Raspberry e microcontroladores
         "https://www.hackster.io/projects.rss"    # Focado 100% em projetos práticos de IoT e embarcados
     ],
+    "GAMES": [ # <-- NOVA CATEGORIA AQUI
+        "https://www.polygon.com/rss/index.xml",
+        "https://www.gamespot.com/feeds/game-news/",
+        "https://rss.indiedb.com/headlines/def/feed.rss"
+    ],
     "ASTRONOMIA": [
         "https://www.space.com/feeds/all",
         "https://www.universetoday.com/feed/",
@@ -204,7 +210,7 @@ def renderizar_grade(noticias):
     
     st.markdown(html, unsafe_allow_html=True)
 # 5. ABAS NATIVAS COMO HEADER
-aba1, aba2, aba3 = st.tabs(["SEGURANÇA", "HARDWARE", "ASTRONOMIA"])
+aba1, aba2, aba3, aba4 = st.tabs(["SEGURANÇA", "HARDWARE", "ASTRONOMIA", "GAMES"])
 
 with aba1:
     with st.spinner("Carregando relatórios de Segurança..."):
@@ -220,3 +226,8 @@ with aba3:
     with st.spinner("Mapeando o Cosmos..."):
         noticias_astro = buscar_e_traduzir(fontes["ASTRONOMIA"], "ASTRONOMIA")
         renderizar_grade(noticias_astro)
+
+with aba4: # <-- NOVO BLOCO DE GAMES
+    with st.spinner("Dando Start nos Games..."):
+        noticias_games = buscar_e_traduzir(fontes["GAMES"], "GAMES")
+        renderizar_grade(noticias_games)
