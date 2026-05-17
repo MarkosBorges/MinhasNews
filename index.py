@@ -179,6 +179,7 @@ fontes = {
     ],
     "HARDWARE": [
         "https://hackaday.com/blog/feed/",
+        "https://www.adrenaline.com.br/rss",
         "https://www.tomshardware.com/feeds/all", # Gigante global de análises de hardware
         "https://www.raspberrypi.com/news/feed/", # Novidades do mundo Raspberry e microcontroladores
         "https://www.hackster.io/projects.rss"    # Focado 100% em projetos práticos de IoT e embarcados
@@ -187,9 +188,12 @@ fontes = {
         "https://br.ign.com/feed.xml",
         "https://www.theenemy.com.br/rss",
         "https://www.pcgamer.com/rss/",
+        "https://kotaku.com/rss",
+        "https://www.rockpapershotgun.com/feed",
         "https://www.eurogamer.net/feed",
         "https://www.polygon.com/rss/index.xml",
         "https://www.gamespot.com/feeds/game-news/",
+        "https://www.adrenaline.com.br/rss",
         "https://rss.indiedb.com/headlines/def/feed.rss"
     ],
     "ASTRONOMIA": [
