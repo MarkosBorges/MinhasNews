@@ -1,231 +1,214 @@
 import streamlit as st
 import feedparser
 from deep_translator import GoogleTranslator
+from bs4 import BeautifulSoup
 
-# 1. Configuração de Página
-st.set_page_config(page_title="Mark Newa - Minhas notícias pessoais", layout="centered", initial_sidebar_state="collapsed")
+# 1. Configuração de Página e Layout
+st.set_page_config(page_title="Radar Tech Pro", layout="wide", initial_sidebar_state="collapsed")
 
-def traduzir_manchete(texto):
-    if not texto:
-        return ""
+if 'categoria' not in st.session_state:
+    st.session_state.categoria = "SEGURANÇA"
+
+def traduzir_texto(texto):
+    if not texto: return ""
     try:
         return GoogleTranslator(source='auto', target='pt').translate(texto)
-    except Exception:
-        return texto 
+    except: return texto 
+
+# Função para extrair imagem do feed ou usar um Fallback (imagem padrão) de alta qualidade
+def extrair_imagem(entry, categoria):
+    # Tenta pegar a imagem anexada na mídia do RSS
+    if 'media_content' in entry and len(entry.media_content) > 0:
+        return entry.media_content[0]['url']
+    if 'enclosures' in entry and len(entry.enclosures) > 0:
+        if 'image' in entry.enclosures[0].get('type', ''):
+            return entry.enclosures[0]['href']
+            
+    # Tenta "raspar" a imagem de dentro do texto da notícia
+    if 'summary' in entry:
+        soup = BeautifulSoup(entry.summary, 'html.parser')
+        img = soup.find('img')
+        if img and img.get('src'):
+            return img['src']
+            
+    # Imagens padrão profissionais caso o site não forneça uma imagem no feed
+    fallbacks = {
+        "SEGURANÇA": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80",
+        "HARDWARE": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80",
+        "ASTRONOMIA": "https://images.unsplash.com/photo-1464802686167-b939a6910659?w=600&q=80"
+    }
+    return fallbacks.get(categoria)
+
+# Função para limpar tags HTML do resumo e limitar o tamanho
+def limpar_resumo(html_text):
+    if not html_text: return ""
+    soup = BeautifulSoup(html_text, 'html.parser')
+    texto_limpo = soup.get_text(separator=' ', strip=True)
+    return texto_limpo[:140] + "..." if len(texto_limpo) > 140 else texto_limpo
 
 @st.cache_data(ttl=1800)
-def buscar_e_traduzir_noticias(urls, limite=5):
+def buscar_e_traduzir(urls, categoria, limite=6):
     noticias = []
     for url in urls:
         feed = feedparser.parse(url)
         nome_fonte = feed.feed.get('title', 'Portal').split(' - ')[0].split(' | ')[0]
         
         for entry in feed.entries[:limite]: 
-            titulo_pt = traduzir_manchete(entry.title)
+            titulo_pt = traduzir_texto(entry.title)
+            
+            # Limpa e traduz o resumo
+            resumo_original = entry.get('summary', '')
+            resumo_limpo = limpar_resumo(resumo_original)
+            resumo_pt = traduzir_texto(resumo_limpo) if resumo_limpo else ""
+            
+            imagem_url = extrair_imagem(entry, categoria)
+            
             noticias.append({
-                'titulo': titulo_pt,
+                'titulo': titulo_pt, 
+                'resumo': resumo_pt,
                 'link': entry.link,
-                'data': entry.get('published', 'Recent'),
+                'imagem': imagem_url,
+                'data': entry.get('published', 'Recent')[:16], # Pega apenas parte da data
                 'fonte': nome_fonte
             })
     return noticias
 
-# 2. Injeção de CSS (Header Estilo Tecnoblog + Tons de Roxo) e FontAwesome para Ícones
+# 2. CSS AVANÇADO (Design de Portal Pro)
 st.markdown("""
-    <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap'>
     <style>
-        /* Fundo Geral e Tipografia Inter */
-        html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-            background-color: #0B0813 !important; 
-            font-family: 'Inter', sans-serif;
-            color: #E2DBEB;
-        }
-        
-        /* Limpeza do Streamlit */
+        [data-testid="stAppViewContainer"] { background-color: #0A0710; font-family: 'Inter', sans-serif; }
         #MainMenu, footer, header {visibility: hidden;}
+
+        .main-header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 75px;
+            background-color: #120E1F; border-bottom: 1px solid #221B35;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 30px;
+            padding: 10px;
+            margin-top: 100px;
+        }
+
+        /* CARDS NÍVEL PROFISSIONAL */
+        .card {
+            background-color: #151124;
+            border: 1px solid #2A2145;
+            border-radius: 12px;
+            overflow: hidden; /* Mantém a imagem dentro do card arredondado */
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: #8E24AA;
+            box-shadow: 0 12px 30px rgba(142, 36, 170, 0.15);
+        }
         
-        /* HEADER CUSTOMIZADO (ESTILO PORTAL) */
-        .top-header {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .card-image {
             width: 100%;
-            height: 60px;
-            background-color: #1A142A; /* Roxo ligeiramente mais claro que o fundo */
+            height: 200px;
+            object-fit: cover; /* Faz a imagem preencher o espaço sem distorcer */
             border-bottom: 1px solid #2A2145;
+        }
+
+        .card-content {
+            padding: 24px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 4%;
-            z-index: 999999;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            flex-direction: column;
+            flex-grow: 1;
         }
-        
-        /* Logo esquerda */
-        .header-logo {
-            font-weight: 700;
-            font-size: 1.4rem;
-            color: #FFFFFF;
-            text-decoration: none;
-            font-style: italic;
-            letter-spacing: -0.5px;
-        }
-        .header-logo span { color: #B388FF; }
-        
-        /* Menus centrais (meramente visuais para estética) */
-        .header-nav {
-            display: flex;
-            gap: 25px;
-        }
-        .header-nav a {
-            color: #A99BBF;
-            text-decoration: none;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+
+        .card-title a {
+            color: #F8F5FA; text-decoration: none;
+            font-size: 1.25rem; font-weight: 700; line-height: 1.4;
+            display: block; margin-bottom: 12px;
             transition: color 0.2s;
         }
-        .header-nav a:hover { color: #FFFFFF; }
+        .card-title a:hover { color: #D1B3FF; }
         
-        /* Ícones direita */
-        .header-icons {
-            display: flex;
-            gap: 20px;
-            color: #A99BBF;
-            font-size: 1.1rem;
+        .card-excerpt {
+            color: #9E91B3; font-size: 0.95rem; line-height: 1.5;
+            margin-bottom: 20px; flex-grow: 1;
         }
-        .header-icons i { cursor: pointer; transition: color 0.2s; }
-        .header-icons i:hover { color: #B388FF; }
 
-        /* Ajuste do container para não ficar atrás do header fixo */
-        .block-container {
-            padding-top: 6rem;
-            max-width: 700px;
+        .card-meta {
+            font-size: 0.8rem; color: #796B8E;
+            display: flex; align-items: center; gap: 10px;
+            border-top: 1px solid #2A2145;
+            padding-top: 16px;
         }
-        
-        /* Estilização dos Blocos de Notícias */
-        .news-card {
-            background-color: #141021; 
-            padding: 22px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            border: 1px solid #221B35;
-            transition: all 0.2s ease-in-out;
-            border-left: 4px solid #221B35; /* Detalhe lateral de portal de notícias */
+        .tag {
+            background-color: #2D1B4E; color: #E2DBEB;
+            padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 0.7rem;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .news-card:hover {
-            transform: translateX(4px); /* Animação sutil para a direita */
-            border-left-color: #B388FF;
-            box-shadow: 0 4px 15px rgba(179, 136, 255, 0.08);
+
+        div.row-widget.stRadio > div {
+            flex-direction: row; justify-content: center; gap: 50px;
+            position: fixed; top: 20px; width: 100%; z-index: 10000;
         }
-        .news-title a {
-            color: #F3EEF6;
-            text-decoration: none;
-            font-size: 1.15rem;
-            font-weight: 600;
-            line-height: 1.4;
+        div.row-widget.stRadio label {
+            background: none !important; color: #796B8E !important;
+            font-weight: 700 !important; font-size: 0.95rem !important;
+            text-transform: uppercase; cursor: pointer; border: none !important;
         }
-        .news-title a:hover { color: #D1B3FF; }
-        
-        .news-meta {
-            font-size: 0.75rem;
-            color: #796B8E;
-            margin-top: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .source-tag {
-            background-color: #261743;
-            color: #D1B3FF;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        /* Customização Elegante das Abas (Tabs) */
-        .stTabs [data-baseweb="tab-list"] { gap: 10px; border-bottom: 1px solid #2A2145; }
-        .stTabs [data-baseweb="tab"] {
-            background-color: transparent !important;
-            color: #796B8E !important;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        .stTabs [aria-selected="true"] {
-            color: #D1B3FF !important;
-            border-bottom: 2px solid #B388FF !important;
-        }
+        div.row-widget.stRadio [data-testid="stWidgetLabel"] { display: none; }
+        div.row-widget.stRadio [data-testid="stMarkdownContainer"] p { color: #8C7E9C; letter-spacing: 1px; }
+        div.row-widget.stRadio input:checked + div p { color: #FFFFFF !important; }
     </style>
-    
-    <div class="top-header">
-        <a href="#" class="header-logo">radar<span>.tech</span></a>
-        <div class="header-nav">
-            <a href="#">Segurança</a>
-            <a href="#">Hardware</a>
-            <a href="#">Astronomia</a>
-        </div>
-        <div class="header-icons">
-            <i class="fas fa-search"></i>
-            <i class="fab fa-github"></i>
-            <i class="fas fa-sun"></i>
-        </div>
-    </div>
+    <div class="main-header"></div>
 """, unsafe_allow_html=True)
 
+# 3. NAVEGAÇÃO
+selecionado = st.radio("Menu", ["SEGURANÇA", "HARDWARE", "ASTRONOMIA"], horizontal=True, label_visibility="collapsed")
 
-# 3. Listas de Fontes Separadas
-fontes_sec = [
-    "https://feeds.feedburner.com/TheHackersNews",
-    "https://www.bleepingcomputer.com/feed/",
-    "https://krebsonsecurity.com/feed/",
-    "https://tecnoblog.net/categoria/seguranca/feed/",
-    "https://mundohacker.com.br/feed/"
-]
+fontes = {
+    "SEGURANÇA": [
+        "https://feeds.feedburner.com/TheHackersNews",
+        "https://www.bleepingcomputer.com/feed/"
+    ],
+    "HARDWARE": [
+        "https://hackaday.com/blog/feed/",
+        "https://www.tomshardware.com/feeds/all"
+    ],
+    "ASTRONOMIA": [
+        "https://www.space.com/feeds/all",
+        "https://www.universetoday.com/feed/"
+    ]
+}
 
-fontes_hard_iot = [
-    "https://hackaday.com/blog/feed/",
-    "https://www.tomshardware.com/feeds/all", # Gigante global de análises de hardware
-    "https://www.raspberrypi.com/news/feed/", # Novidades do mundo Raspberry e microcontroladores
-    "https://www.hackster.io/projects.rss"    # Focado 100% em projetos práticos de IoT e embarcados
-]
+# 4. RENDERIZAÇÃO PROFISSIONAL
+st.markdown('<div class="news-grid">', unsafe_allow_html=True)
 
-fontes_astro = [
-    "https://www.space.com/feeds/all",
-    "https://www.universetoday.com/feed/",
-    "https://canaltech.com.br/espaco/rss/"
-]
-
-# 4. As 3 Abas
-aba1, aba2, aba3 = st.tabs(["🔒 Segurança & Hacking", "⚙️ Hardware & IoTs", "🔭 Astronomia"])
-
-def renderizar_noticias(noticias):
+with st.spinner(f"Carregando inteligência de {selecionado}..."):
+    noticias = buscar_e_traduzir(fontes[selecionado], selecionado)
+    
     for n in noticias:
         st.markdown(f"""
-            <div class="news-card">
-                <div class="news-title"><a href="{n['link']}" target="_blank">{n['titulo']}</a></div>
-                <div class="news-meta">
-                    <span class="source-tag">{n['fonte']}</span>
-                    <span>•</span>
-                    <span><i class="far fa-clock"></i> {n['data']}</span>
+            <div class="card">
+                <img src="{n['imagem']}" class="card-image" alt="Capa da Notícia">
+                <div class="card-content">
+                    <div class="card-title">
+                        <a href="{n['link']}" target="_blank">{n['titulo']}</a>
+                    </div>
+                    <div class="card-excerpt">
+                        {n['resumo']}
+                    </div>
+                    <div class="card-meta">
+                        <span class="tag">{n['fonte']}</span>
+                        <span>•</span>
+                        <span>{n['data']}</span>
+                    </div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
 
-with aba1:
-    st.markdown("<br>", unsafe_allow_html=True)
-    with st.spinner("Buscando relatórios de segurança..."):
-        renderizar_noticias(buscar_e_traduzir_noticias(fontes_sec))
-
-with aba2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    with st.spinner("Verificando novidades de hardware..."):
-        renderizar_noticias(buscar_e_traduzir_noticias(fontes_hard_iot))
-
-with aba3:
-    st.markdown("<br>", unsafe_allow_html=True)
-    with st.spinner("Sintonizando frequências espaciais..."):
-        renderizar_noticias(buscar_e_traduzir_noticias(fontes_astro))
+st.markdown('</div>', unsafe_allow_html=True)
